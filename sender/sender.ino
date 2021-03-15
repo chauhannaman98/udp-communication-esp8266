@@ -6,8 +6,8 @@
 
 const char* ssid = "ESP8266-Access-Point";
 const char* password = "123456789";
-//char senderPacket[] = "Hey! It's a test message";
-const int senderPacket = 1;
+char senderPacket[100];
+//const int senderPacket = 1;
 
 AsyncWebServer server(80);
 WiFiUDP Udp;
@@ -30,9 +30,14 @@ void setup() {
 }
 
 void loop() {
-  if(Udp.beginPacket("192.168.4.2", PORT))
-    Serial.println("Packet sent");
-  Udp.write(senderPacket);
-  Udp.endPacket();
-  delay(1000);
+  while (Serial.available() > 0 ) {
+    String inputString = Serial.readString();
+    inputString.toCharArray(senderPacket, 100);
+    if(Udp.beginPacket("192.168.4.2", PORT) &&
+      Udp.write(senderPacket) &&
+      Udp.endPacket())  {
+      Serial.printf("Packet sent: %s\n", senderPacket);
+    }
+    delay(1000);
+  }
 }

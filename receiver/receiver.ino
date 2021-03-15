@@ -25,6 +25,7 @@ void setup()  {
 
   Udp.begin(localUdpPort);
   Serial.printf("Now listening at IP %s, UDP port %d\n", WiFi.localIP().toString().c_str(), localUdpPort);
+  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
@@ -36,11 +37,21 @@ void loop() {
     if (len > 0)  {
       incomingPacket[len] = 0;
     }
-    Serial.printf("UDP packet contents: %s\n", incomingPacket);
+    Serial.printf("UDP packet contents:%s\n", incomingPacket);
+    
+    if(strcmp(incomingPacket, "true")==10)  {
+      Serial.println("on");
+      digitalWrite(LED_BUILTIN, LOW); // turn led ON
+    }
+    else if(strcmp(incomingPacket, "false")==10) {
+      Serial.println("off");
+      digitalWrite(LED_BUILTIN, HIGH);  //turn led OFF
+    }
 
     // send back a reply, to the IP address and port we got the packet from
     Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
     Udp.write(replyPacket);
     Udp.endPacket();
+    Serial.println("Reply sent");
   }
 }
