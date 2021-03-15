@@ -2,12 +2,12 @@
 #include <WiFiUdp.h>
 #include "ESPAsyncWebServer.h"
 
-//#define IP "192.168.4.2"
-#define port 4210
+#define PORT 4210
 
 const char* ssid = "ESP8266-Access-Point";
 const char* password = "123456789";
-char senderPacket[] = "Hey! It's a test message";
+//char senderPacket[] = "Hey! It's a test message";
+const int senderPacket = 1;
 
 AsyncWebServer server(80);
 WiFiUDP Udp;
@@ -26,12 +26,12 @@ void setup() {
   Serial.print("AP IP address: ");
   Serial.println(IP);
 
-  server.begin();
+  server.begin(); 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.println(Udp.beginPacket("192.168.4.2", port));
+  if(Udp.beginPacket("192.168.4.2", PORT))
+    Serial.println("Packet sent");
   Udp.write(senderPacket);
   Udp.endPacket();
   delay(1000);
