@@ -27,17 +27,41 @@ void setup() {
   Serial.println(IP);
 
   server.begin(); 
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void loop() {
-  while (Serial.available() > 0 ) {
-    String inputString = Serial.readString();
-    inputString.toCharArray(senderPacket, 100);
-    if(Udp.beginPacket("192.168.4.2", PORT) &&
-      Udp.write(senderPacket) &&
-      Udp.endPacket())  {
-      Serial.printf("Packet sent: %s\n", senderPacket);
+  if(client_status()) {
+    digitalWrite(LED_BUILTIN, LOW);
+    while (Serial.available() > 0 ) {
+      String inputString = Serial.readString();
+      inputString.toCharArray(senderPacket, 100);
+      if(Udp.beginPacket("192.168.4.2", PORT) &&
+        Udp.write(senderPacket) &&
+        Udp.endPacket())  {
+        Serial.printf("Packet sent: %s\n", senderPacket);
+      }
+      delay(1000);
     }
-    delay(1000);
+  }
+  else  {
+    digitalWrite(LED_BUILTIN, HIGH);
+  }
+}
+
+bool client_status() {
+  unsigned char number_client;  
+  number_client= wifi_softap_get_station_num();
+  
+//  Serial.print(" Total Connected Clients are = ");
+//  Serial.println(number_client);
+
+  if(number_client == 0)  {
+    return false;
+  }
+  else if(number_client == 1) {
+    return true;
   }
 }

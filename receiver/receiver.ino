@@ -26,9 +26,18 @@ void setup()  {
   Udp.begin(localUdpPort);
   Serial.printf("Now listening at IP %s, UDP port %d\n", WiFi.localIP().toString().c_str(), localUdpPort);
   pinMode(LED_BUILTIN, OUTPUT);
+
+  // turn off by default
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void loop() {
+  Serial.println(WiFi.status());
+  if(WiFi.status() != WL_CONNECTED) {
+    Serial.println("Resetting ESP. . .");
+    ESP.reset();
+  }
+  else  {
   int packetSize = Udp.parsePacket();
   if (packetSize) {
     // receive incoming UDP packets
@@ -40,11 +49,9 @@ void loop() {
     Serial.printf("UDP packet contents:%s\n", incomingPacket);
     
     if(strcmp(incomingPacket, "true")==10)  {
-      Serial.println("on");
       digitalWrite(LED_BUILTIN, LOW); // turn led ON
     }
     else if(strcmp(incomingPacket, "false")==10) {
-      Serial.println("off");
       digitalWrite(LED_BUILTIN, HIGH);  //turn led OFF
     }
 
@@ -52,6 +59,6 @@ void loop() {
     Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
     Udp.write(replyPacket);
     Udp.endPacket();
-    Serial.println("Reply sent");
+  }
   }
 }
